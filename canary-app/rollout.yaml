@@ -2,11 +2,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: example-rollout2
-  labels:
-    acs.amadeus.com/securityZone: anz
-    app.kubernetes.io/instance: demo-rollout
-    app.kubernetes.io/managed-by: cds
-    app.kubernetes.io/name: demo-app
 spec:
   replicas: 5
   selector:
@@ -16,10 +11,6 @@ spec:
     metadata:
       labels:
         app: nginx
-        acs.amadeus.com/securityZone: anz
-        app.kubernetes.io/instance: demo-rollout
-        app.kubernetes.io/managed-by: cds
-        app.kubernetes.io/name: demo-app
     spec:
       containers:
       - name: nginx

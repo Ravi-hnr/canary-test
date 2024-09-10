@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
-  name: example-rollout
+  name: example-rollout2
   labels:
     acs.amadeus.com/securityZone: anz
     app.kubernetes.io/instance: demo-rollout

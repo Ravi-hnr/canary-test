@@ -1,0 +1,65 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: example-rollout
+  labels:
+    acs.amadeus.com/securityZone: anz
+    app.kubernetes.io/instance: demo-rollout
+    app.kubernetes.io/managed-by: cds
+    app.kubernetes.io/name: demo-app
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+        acs.amadeus.com/securityZone: anz
+        app.kubernetes.io/instance: demo-rollout
+        app.kubernetes.io/managed-by: cds
+        app.kubernetes.io/name: demo-app
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.15.6
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: nginx-cache
+          mountPath: /var/cache/nginx
+        - mountPath: /var/run
+          name: nginx-run
+        - name: nginx-config-volume
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+      volumes:
+      - name: nginx-config-volume
+        configMap:
+          name: nginx-config
+      - name: nginx-cache
+        emptyDir: {}
+      - name: nginx-run
+        emptyDir: {}
+  minReadySeconds: 30
+  revisionHistoryLimit: 3
+  strategy:
+    canary: #Indicates that the rollout should use the Canary strategy
+      #analysis:
+        #templates:
+        #- templateName: validation-job
+        #- templateName: success-rate
+        #args:
+        #- name: service-name
+          #value: demo-app
+      steps:
+      - setWeight: 20
+      - pause: {}
+      - setWeight: 40
+      - pause: {duration: 5}
+      - setWeight: 60
+      - pause: {duration: 5}
+      - setWeight: 80
+      - pause: {duration: 5}

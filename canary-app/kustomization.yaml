@@ -4,7 +4,7 @@ kind: Kustomization
 resources:
 #- analysis-template-job.yaml
 #- analysis-template-metric.yaml
-#- nginx-config.yaml
-#- rollout.yaml
-#- service.yaml
+- nginx-config.yaml
+- rollout.yaml
+- service.yaml
 - canary-example2.yaml

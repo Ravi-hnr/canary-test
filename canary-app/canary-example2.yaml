@@ -1,34 +1,61 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
-  name: rollout-canary2
+  name: rollout-baseline-vs-canary
+  labels:
+    g: m
 spec:
-  replicas: 5
+  replicas: 2
   revisionHistoryLimit: 2
   selector:
     matchLabels:
-      app: rollout-canary
+      app: rollout-baseline-vs-canary
   template:
     metadata:
       labels:
-        app: rollout-canary
+        app: rollout-baseline-vs-canary
+        acs.amadeus.com/securityZone: tnz
+        app.kubernetes.io/managed-by: cds
+        app.kubernetes.io/part-of: argocd
+        app.kubernetes.io/version: "1.23"
     spec:
       containers:
-      - name: rollouts-demo
-        image: argoproj/rollouts-demo:blue
+      - name: rollout-baseline-vs-canary
+        image: argoproj/rollouts-demo:yellow
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
+      tolerations:
+      - key: reservedFor
+        operator: Equal
+        value: argocd-32
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/argocd-32: 'true'
   strategy:
     canary:
       steps:
-      - setWeight: 20
-      # The following pause step will pause the rollout indefinitely until manually resumed.
-      # Rollouts can be manually resumed by running `kubectl argo rollouts promote ROLLOUT`
-      - pause: {}
-      - setWeight: 40
-      - pause: {duration: 40s}
-      - setWeight: 60
-      - pause: {duration: 20s}
-      - setWeight: 80
-      - pause: {duration: 20s}
+      - setWeight: 50
+      - experiment:
+          templates:
+          - name: baseline
+            specRef: stable
+            template:
+              metadata:
+                labels:
+                  env: x
+            metadata:
+              labels:
+                app: rollout-stable
+                x: y
+          - name: canary
+            specRef: canary
+            template:
+              metadata:
+                labels:
+                  env: z
+            metadata:
+              labels:
+                app: rollout-canary
+                m: n
+
